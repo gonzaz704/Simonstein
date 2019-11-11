@@ -1,0 +1,284 @@
+<!DOCTYPE html> 
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Simon Dice</title>
+    <style>
+      body {
+        margin: 0;
+        background: #dedede;
+        display: flex;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .gameboard {
+        height: 100vh;
+        width: 100vh;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto;
+        max-height: 60vh;
+        max-width: 60vh;
+      }
+
+      .color {
+        width: 50%;
+        height: 50%;
+        display: inline-block;
+      }
+
+      .left {
+        float: left;
+      }
+
+      .right {
+        float: left;
+      }
+
+      .celeste {
+        background: #22a6b3;
+      }
+
+      .celeste.light {
+        background: #7ed6df;
+      }
+
+      .violeta {
+        background: #be2edd;
+      }
+
+      .violeta.light {
+        background: #e056fd;
+      }
+
+      .naranja {
+        background: #f0932b;
+      }
+
+      .naranja.light {
+        background: #ffbe76;
+      }
+
+      .verde {
+        background: #6ab04c;
+      }
+
+      .verde.light {
+        background: #badc58;
+      }
+
+      .btn-start {
+        width: 400px;
+        height: 100px;
+        background: #ecf0f1;
+        color: #2c3e50;
+        font-size: 2.5rem;
+        position: absolute;
+        top: calc(50% - 50px);
+        left: calc(50% - 200px);
+      }
+
+      .hide {
+        display: none;
+      }
+
+      * {font-family: 'Arial'}; <!--PASO 52 -->
+    </style>
+  </head>
+  <body>
+    <div class="gameboard">
+      <div id="celeste" class="color celeste left" data-color="celeste"></div>
+      <div id="violeta" class="color violeta right" data-color="violeta"></div>
+      <div id="naranja" class="color naranja left" data-color="naranja"></div>
+      <div id="verde" class="color verde right" data-color="verde"></div>
+      <button id="btnEmpezar" class="btn-start" onclick="empezarJuego();bleep.play()">Empezar a jugar!</button> 
+<!-- HASTA ACA PASO 1 -->
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+    <script>
+//PASO 9 Es poner estos color de botones
+    	const celeste = document.getElementById('celeste') 
+		const violeta = document.getElementById('violeta')
+		const naranja = document.getElementById('naranja')
+		const verde = document.getElementById('verde')
+		const btnEmpezar = document.getElementById ('btnEmpezar') //PASO 8 Ahora la variable btnEmpezar la tenemos disponible para usar
+		const ULTIMO_NIVEL = 10 // PASO 45
+//		swal('hola!') //Solo para probar la libreria swal
+			class Juego {  //PASO 4
+				constructor() { //PASO 5
+					this.inicializar = this.inicializar.bind(this) // PASO 57
+					this.inicializar() //PASO 6
+					this.generarSecuencia() // PASO 13
+				//	this.siguientenivel() // PASO 16
+					setTimeout(this.siguientenivel, 500);// PASO 51
+				}
+
+				inicializar() { //PASO 7 va a ocultar el boton de "empezar", primero hay que ocultarlo para poder inicializarlo
+					this.siguientenivel = this.siguientenivel.bind(this)
+					this.elegirColor = this.elegirColor.bind(this) // PASO 36 No lo entendi bien (quiere que el "this" sea el nuevo objeto juego que creó al principio, quiere que siempre que escribamos "this" haga referencia a eso y no al color en particular) pero es para que quede fijo el "this" del "juego en general" cuando se lo llama en el PASO 35 y no quede cada color cuando lo clickeamos (esto nos fijamos en la consola)  Lo que no entiendo es por que quiere que quede el juego en general y no cada color como tendria que ser porque asi se ve que está identificadno el color que el usuario clickea.. no lo se..
+					this.toggleBtnEmpezar() // PASO 58
+				//	btnEmpezar.classList.add('hide') // PASO 10
+					this.nivel = 1 // PASO 11 y PASO 30 CUANDO CAMBIA LA CANTIDAD DE VECES QUE SE ILUMINA
+					this.colores = { // PASO 12
+						celeste, 
+						violeta,
+						naranja,
+						verde
+
+					}
+				}
+
+				toggleBtnEmpezar() { // PASO 59
+					if (btnEmpezar.classList.contains('hide')) {
+						btnEmpezar.classList.remove('hide')
+					} else {
+						btnEmpezar.classList.add('hide')
+					}					
+				}
+				generarSecuencia() { //PASO 14
+			//		this.secuencia = new Array(10).fill(0).map(n => Math.floor(Math.random () * 4)) //PASO 15
+					this.secuencia = new Array(ULTIMO_NIVEL).fill(0).map(n => Math.floor(Math.random () * 4)) //PASO 46
+					}
+
+				
+				siguientenivel() { // PASO 17
+						this.subnivel = 0 // PASO 40
+						this.iluminarSecuencia() //PASO 18
+						this.agregarEventosClick() //PASO 31 Obtengamos el input del usuario para ver si el boton que toca es correcto o incorrecto segun la secuencia que le tocó
+					}
+					//esta repeticion va hasta el nivel donde se encuentra el usuario, de esta manera obtenemos el color que lo va a iluminar y llamamos a una funcion para que lo ilumine. Para obtener el color tenemos la "secuencia de numeros" de la funcion generarSecuencia con nummeros del 1 al 3. 
+					
+					iluminarSecuencia() { // PASO 19
+						for (let i =0; i < this.nivel; i++) { //PASO 20
+							let color = this.transformarNumeroaColor(this.secuencia[i])//PASO 23
+							//this.iluminarColor(color) //PASO 24
+							setTimeout(() => this.iluminarColor(color), 1000 * i) //PASO 29 esta funcion es para que los colores se vayan prendiendo cada cierto tiempo (enseguida de empezado el juego, desp de 1 seg, desp de 3 seg etc. el i se pone para que el color se elimine al segundo, desp a los 3 seg, desp a los 5 seg y asi sucesivamente
+						}
+					}	
+
+					iluminarColor(color) { //PASO 25
+						this.colores[color].classList.add('light') 
+						setTimeout(() => this.apagarColor(color), 500)// PASO 26
+						scolor.play()
+					}
+
+					apagarColor(color) { //PASO 27
+						this.colores[color].classList.remove('light') // PASO 28
+					} 
+
+					agregarEventosClick(){ //PASO 32 Llamamos a este metodo y a cada uno de los colores tenemos que agregarle el evento click y decirle al navegador que funcion tiene que ejecutar cuando se realize ese evento click. Esto es algo que javascript le indica al navegador y que esa funcion se va a ejecutar asincronamente y javascript cuando se quede sin tareas las va a ejecutar
+						this.colores.celeste.addEventListener('click', this.elegirColor) //PASO 33 Para cada uno de los colores le agregamos el evento "addEventListener" para agregar un manejador de eventos, esta funcion primero le indicamos el nombre del evento "click" y despues le indicamos que funcion tiene que ejecutar
+						this.colores.verde.addEventListener('click', this.elegirColor)
+						this.colores.violeta.addEventListener('click', this.elegirColor)
+						this.colores.naranja.addEventListener('click', this.elegirColor)
+					}
+
+					eliminarEventosClick () { // PASO 50
+						this.colores.celeste.removeEventListener('click', this.elegirColor) //PASO 33 Para cada uno de los colores le agregamos el evento "removeEventListener" para agregar un manejador de eventos, esta funcion primero le indicamos el nombre del evento "click" y despues le indicamos que funcion tiene que ejecutar
+						this.colores.verde.removeEventListener('click', this.elegirColor)
+						this.colores.violeta.removeEventListener('click', this.elegirColor)
+						this.colores.naranja.removeEventListener('click', this.elegirColor)
+					}
+
+					elegirColor(ev) { // PASO 34 Creamos la funcion "elegirColor" que definimos arriba. El navegador le va a decir a javascript que le llame a esta funcion cuando suceda ese evento. A los metodos de los manejadores de eventos generalmente se los llama por parametro con el nombre "ev"
+						//		console.log (ev) // PASO 35 me fijo en la consola y se puede ver como cuando clickeo en el juego se 			llama al evento
+						//console.log (this) //PASO 36
+						//console.log (ev) //PASO 37 Va a empezar a agregar la logica para ver qué pasa cuando el usuario clickea un color (gana pierde, pasa siguiente nivel o no)
+
+						const nombreColor = ev.target.dataset.color // PASO 37 dataset sale del css que hizo arriba del todo. Lo que hace ahora es ver el numero del color que eligió el usuario. Despues de guardar los colores que elige el usuario en la variable "nombreColor" debemos transformar este nombre "nombreColor" al numero para poder ver si en la secuencia es correcto ese numero o no
+						const numeroColor = this.transformarColorANumero(nombreColor)// PASO 38
+						this.iluminarColor(nombreColor) // PASO 39
+						if (numeroColor === this.secuencia[this.subnivel]) { //PASO 41
+							this.subnivel++ //PASO 42
+							if (this.subnivel === this.nivel){ //PASO 43
+								this.nivel++ // PASO 44
+								this.eliminarEventosClick() // PASO 45
+								if (this.nivel === ULTIMO_NIVEL + 1) { // PASO 46
+									//GANÓ
+									this.ganoElJuego() // PASO 53
+
+								} else { // PASO 47 
+							//		this.siguientenivel() // PASO 48
+									setTimeout(this.siguientenivel, 1500) // se le ocurrio al final (paso 51)							  	  
+								} 
+							} 
+					
+						} else { //PASO 49
+						//PERDIÓ
+						this.perdioelJuego() // PASO 54
+							}
+					}	
+
+					ganoElJuego() { // PASO 55
+						bleep.pause()
+						winner.play()
+						swal('Ganaste!')
+					.then(()=> { 
+					//	this.inicializar()})
+						window.location.reload()})
+					}
+
+					perdioelJuego() { // PASO 56
+						bleep.pause()
+						looser.play()
+						swal('Perdiste')
+					.then(()=> { 
+					//	this.inicializar()})
+						window.location.reload()})
+					}
+
+
+					//Ahora tenemos que tener un metodo que asigne a cada numero un color. Entonces pongamoslo (transformarNumeroaColor())
+					transformarNumeroaColor(numero){ //PASO 21
+						switch (numero) { //PASO 22  
+							case 0:
+							   return 'celeste'
+							case 1:
+								return 'violeta'
+							case 2:
+								return 'naranja'
+							case 3:
+								return 'verde'
+						} //esta funcion entonces transforma de un numero a un color
+					}
+
+					transformarColorANumero(color){
+						switch (color) { //PASO 38  
+							case 'celeste':
+							   return 0
+							case 'violeta':
+								return 1
+							case 'naranja':
+								return 2
+							case 'verde':
+								return 3
+					}
+			}
+				
+
+		}	
+			function empezarJuego() {  //PASO 2
+				window.juego = new Juego() //PASO 3
+			}
+
+		
+    </script>
+    <script>
+var bleep = new Audio();
+bleep.src = 'DEUTSCHLAND.mp3';
+</script>
+<script>
+var scolor = new Audio();
+scolor.src = 'soundcolor.mp3';
+</script>
+<script>
+var looser = new Audio();
+looser.src = 'looser.wav';
+</script>
+<script>
+var winner = new Audio();
+winner.src = 'winner.wav';
+</script>
+  </body>
+</html>
